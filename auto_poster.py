@@ -2,7 +2,10 @@ import os
 import random
 import requests
 import urllib.parse
+from dotenv import load_dotenv
 from google import genai
+
+load_dotenv()
 
 # Environment Variables
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -57,7 +60,7 @@ def generate_post_content():
     
     print("Generating caption via Google Gemini Free API...")
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.8-flash",
         contents=text_prompt,
     )
     caption = response.text.strip()
