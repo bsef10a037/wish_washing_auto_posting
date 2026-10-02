@@ -2,9 +2,8 @@ name: Wish Washing Auto Poster
 
 on:
   schedule:
-    # Runs daily at 04:00 UTC (9:00 AM PKT)
-    - cron: '0 4 * * *'
-  workflow_dispatch: # Enables manual trigger button on GitHub UI
+    - cron: '0 4 * * *' # 09:00 AM PKT
+  workflow_dispatch:
 
 jobs:
   run-poster:
@@ -19,11 +18,11 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python Dependencies
-        run: pip install openai requests
+        run: pip install google-genai requests
 
       - name: Execute Daily Posting Script
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}

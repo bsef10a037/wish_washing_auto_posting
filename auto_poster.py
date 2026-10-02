@@ -1,17 +1,18 @@
 import os
 import random
 import requests
-from openai import OpenAI
+import urllib.parse
+from google import genai
 
 # Environment Variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 FB_PAGE_ID = os.getenv("FB_PAGE_ID")
 IG_USER_ID = os.getenv("IG_USER_ID")
 FB_PAGE_ACCESS_TOKEN = os.getenv("FB_PAGE_ACCESS_TOKEN")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Initialize Gemini Client (Requires google-genai package)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-# 1. Topic Matrix for Dynamic Daily Content
 TOPICS = [
     {
         "theme": "Doorstep Convenience",
@@ -38,7 +39,6 @@ TOPICS = [
 def generate_post_content():
     selected_topic = random.choice(TOPICS)
     
-    # Generate Caption in Roman Urdu + English
     text_prompt = f"""
     You are the social media manager for 'Wish Washing', a mobile doorstep car wash service operating in Sahiwal, Pakistan.
     
@@ -52,35 +52,25 @@ def generate_post_content():
     3. Call to Action (CTA) with WhatsApp booking line: +92-300-0000000
     4. 5 targeted hashtags (e.g. #WishWashing #DoorstepCarWash #Sahiwal #CarCareSahiwal #CleanCar)
     
-    Do NOT use markdown headers or bold headings.
+    Do NOT use markdown headers or bold headings. Keep it natural and persuasive.
     """
     
-    print("Generating post text via OpenAI...")
-    text_response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": text_prompt}],
-        max_tokens=300
+    print("Generating caption via Google Gemini Free API...")
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=text_prompt,
     )
-    caption = text_response.choices[0].message.content.strip()
+    caption = response.text.strip()
 
-    # Generate Visual via DALL-E 3
-    image_prompt = (
-        f"A photorealistic, crisp morning light shot of a professional mobile car wash service in Pakistan. "
-        f"A shiny modern clean sedan parked in a residential driveway in Sahiwal. "
-        f"A detailing technician using a high-pressure foam sprayer with rich snow foam, water droplets reflecting sunlight, "
-        f"4k resolution, clean aesthetic, highly detailed."
+    # Generate Image URL via Pollinations.ai (100% Free, Keyless)
+    raw_prompt = (
+        "Photorealistic modern clean sedan parked in a residential driveway in Pakistan, "
+        "mobile car wash detailer using high pressure foam cannon with rich white foam, bright morning light, 4k detail"
     )
+    encoded_prompt = urllib.parse.quote(raw_prompt)
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={random.randint(1, 99999)}"
     
-    print("Generating image via DALL-E 3...")
-    img_response = client.images.generate(
-        model="dall-e-3",
-        prompt=image_prompt,
-        size="1024x1024",
-        quality="standard",
-        n=1
-    )
-    image_url = img_response.data[0].url
-
+    print("Generated Free Image URL:", image_url)
     return caption, image_url
 
 def post_to_facebook(caption, image_url):
@@ -95,7 +85,6 @@ def post_to_facebook(caption, image_url):
     print("Facebook Posted Successfully:", response.json())
 
 def post_to_instagram(caption, image_url):
-    # Step 1: Create Container
     container_url = f"https://graph.facebook.com/v26.0/{IG_USER_ID}/media"
     payload = {
         'image_url': image_url,
@@ -106,7 +95,6 @@ def post_to_instagram(caption, image_url):
     r.raise_for_status()
     container_id = r.json().get('id')
 
-    # Step 2: Publish Container
     publish_url = f"https://graph.facebook.com/v26.0/{IG_USER_ID}/media_publish"
     pub_payload = {
         'creation_id': container_id,
@@ -128,3 +116,4 @@ if __name__ == "__main__":
         print("Daily automated posting completed successfully!")
     except Exception as e:
         print(f"Error during execution: {e}")
+        raise e
