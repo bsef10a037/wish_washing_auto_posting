@@ -99,6 +99,26 @@ def post_to_facebook(caption, image_url):
     response.raise_for_status()
     print("Facebook Posted Successfully:", response.json())
 
+def wait_for_container_ready(container_id, max_attempts=10, delay_seconds=3):
+    status_url = f"https://graph.facebook.com/v26.0/{container_id}"
+    for attempt in range(1, max_attempts + 1):
+        status_r = requests.get(status_url, params={
+            'fields': 'status_code',
+            'access_token': FB_PAGE_ACCESS_TOKEN
+        })
+        status_r.raise_for_status()
+        status_code = status_r.json().get('status_code')
+
+        if status_code == 'FINISHED':
+            return
+        if status_code == 'ERROR':
+            raise RuntimeError(f"Instagram media container failed to process: {status_r.json()}")
+
+        print(f"Instagram container not ready yet (status={status_code}), attempt {attempt}/{max_attempts}...")
+        time.sleep(delay_seconds)
+
+    raise RuntimeError(f"Instagram media container {container_id} did not finish processing in time")
+
 def post_to_instagram(caption, image_url):
     container_url = f"https://graph.facebook.com/v26.0/{IG_USER_ID}/media"
     payload = {
@@ -110,12 +130,16 @@ def post_to_instagram(caption, image_url):
     r.raise_for_status()
     container_id = r.json().get('id')
 
+    wait_for_container_ready(container_id)
+
     publish_url = f"https://graph.facebook.com/v26.0/{IG_USER_ID}/media_publish"
     pub_payload = {
         'creation_id': container_id,
         'access_token': FB_PAGE_ACCESS_TOKEN
     }
     pub_r = requests.post(publish_url, data=pub_payload)
+    if not pub_r.ok:
+        print("Instagram publish failed:", pub_r.json())
     pub_r.raise_for_status()
     print("Instagram Posted Successfully:", pub_r.json())
 
