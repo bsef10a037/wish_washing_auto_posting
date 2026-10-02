@@ -96,6 +96,8 @@ def post_to_facebook(caption, image_url):
         'access_token': FB_PAGE_ACCESS_TOKEN
     }
     response = requests.post(url, data=payload)
+    if not response.ok:
+        print("Facebook post failed:", response.json())
     response.raise_for_status()
     print("Facebook Posted Successfully:", response.json())
 
