@@ -1,6 +1,7 @@
 import os
 import random
 import requests
+import time
 import urllib.parse
 from dotenv import load_dotenv
 from google import genai
@@ -59,11 +60,22 @@ def generate_post_content():
     """
     
     print("Generating caption via Google Gemini Free API...")
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=text_prompt,
-    )
-    caption = response.text.strip()
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=text_prompt,
+            )
+            caption = response.text.strip()
+            break
+        except Exception as e:
+            if attempt == max_attempts:
+                raise
+            wait_seconds = 10 * attempt
+            print(f"Gemini request failed (attempt {attempt}/{max_attempts}): {e}")
+            print(f"Retrying in {wait_seconds}s...")
+            time.sleep(wait_seconds)
 
     # Generate Image URL via Pollinations.ai (100% Free, Keyless)
     raw_prompt = (
