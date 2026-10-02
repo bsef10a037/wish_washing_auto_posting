@@ -20,7 +20,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 TOPICS = [
     {
         "theme": "Doorstep Convenience",
-        "angle": "Focus on how Wish Washing saves time by cleaning cars right at the customer's doorstep in Sahiwal while they work or relax."
+        "angle": "Focus on how Wish Washing saves time by cleaning cars right at the customer's doorstep in Lahore while they work or relax."
     },
     {
         "theme": "Paint & Clear Coat Protection",
@@ -36,7 +36,7 @@ TOPICS = [
     },
     {
         "theme": "Weekend Readiness",
-        "angle": "Encourage booking a wash before Friday prayers or weekend family trips in Sahiwal."
+        "angle": "Encourage booking a wash before Friday prayers or weekend family trips in Lahore."
     }
 ]
 
@@ -44,7 +44,7 @@ def generate_post_content():
     selected_topic = random.choice(TOPICS)
     
     text_prompt = f"""
-    You are the social media manager for 'Wish Washing', a mobile doorstep car wash service operating in Sahiwal, Pakistan.
+    You are the social media manager for 'Wish Washing', a mobile doorstep car wash service operating in Lahore, Pakistan.
     
     Topic: {selected_topic['theme']}
     Angle: {selected_topic['angle']}
@@ -53,8 +53,8 @@ def generate_post_content():
     Structure:
     1. Attention-grabbing hook line
     2. 2-3 short sentences on the benefit of doorstep car wash
-    3. Call to Action (CTA) with WhatsApp booking line: +92-300-0000000
-    4. 5 targeted hashtags (e.g. #WishWashing #DoorstepCarWash #Sahiwal #CarCareSahiwal #CleanCar)
+    3. Call to Action (CTA) with WhatsApp booking line: +92-371-7011639
+    4. 5 targeted hashtags (e.g. #WishWashing #DoorstepCarWash #Lahore #CarCareLahore #CleanCar)
     
     Do NOT use markdown headers or bold headings. Keep it natural and persuasive.
     """
