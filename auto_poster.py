@@ -60,7 +60,7 @@ def generate_post_content():
     """
     
     print("Generating caption via Google Gemini Free API...")
-    max_attempts = 3
+    max_attempts = 6
     for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
@@ -72,7 +72,7 @@ def generate_post_content():
         except Exception as e:
             if attempt == max_attempts:
                 raise
-            wait_seconds = 10 * attempt
+            wait_seconds = min(15 * (2 ** (attempt - 1)), 120)
             print(f"Gemini request failed (attempt {attempt}/{max_attempts}): {e}")
             print(f"Retrying in {wait_seconds}s...")
             time.sleep(wait_seconds)
