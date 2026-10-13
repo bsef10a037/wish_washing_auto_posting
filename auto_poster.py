@@ -78,9 +78,25 @@ def generate_post_content():
             time.sleep(wait_seconds)
 
     # Generate Image URL via Pollinations.ai (100% Free, Keyless)
+    car_colors = ["white", "jet black", "silver", "midnight blue", "maroon", "graphite grey"]
+    car_models = ["sedan", "SUV", "hatchback", "crossover", "pickup truck"]
+    scenes = [
+        "in a residential driveway in Lahore, Pakistan",
+        "parked outside a house on a quiet Lahore street",
+        "in an apartment building's parking area in Lahore",
+        "on a paved driveway in a Lahore suburb"
+    ]
+    lighting = [
+        "bright morning sunlight", "soft golden hour light", "crisp midday sun",
+        "warm late afternoon light"
+    ]
+
     raw_prompt = (
-        "Photorealistic modern clean sedan parked in a residential driveway in Pakistan, "
-        "mobile car wash detailer using high pressure foam cannon with rich white foam, bright morning light, 4k detail"
+        f"Photorealistic DSLR photo of a {random.choice(car_colors)} {random.choice(car_models)} "
+        f"{random.choice(scenes)}, a mobile car wash detailer in uniform actively washing it "
+        f"with a high pressure foam cannon, thick rich white foam covering the body and wheels, "
+        f"visible water droplets and foam texture, {random.choice(lighting)}, shallow depth of field, "
+        f"shot on 50mm lens, realistic skin and fabric textures, natural shadows, 4k detail, no text, no watermark"
     )
     encoded_prompt = urllib.parse.quote(raw_prompt)
     image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={random.randint(1, 99999)}"
