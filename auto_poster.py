@@ -104,14 +104,29 @@ def generate_post_content():
     print("Generated Free Image URL:", image_url)
     return caption, image_url
 
-def post_to_facebook(caption, image_url):
+def fetch_image_bytes(image_url, max_attempts=5, delay_seconds=5):
+    for attempt in range(1, max_attempts + 1):
+        try:
+            r = requests.get(image_url, timeout=60)
+            content_type = r.headers.get('content-type', '')
+            if r.ok and content_type.startswith('image/') and len(r.content) > 1000:
+                return r.content
+            print(f"Image not ready yet (attempt {attempt}/{max_attempts}, status={r.status_code}, content-type={content_type})...")
+        except requests.RequestException as e:
+            print(f"Image fetch failed (attempt {attempt}/{max_attempts}): {e}")
+        time.sleep(delay_seconds)
+    raise RuntimeError(f"Could not fetch a valid image from {image_url} after {max_attempts} attempts")
+
+def post_to_facebook(caption, image_bytes):
     url = f"https://graph.facebook.com/v26.0/{FB_PAGE_ID}/photos"
     payload = {
-        'url': image_url,
         'caption': caption,
         'access_token': FB_PAGE_ACCESS_TOKEN
     }
-    response = requests.post(url, data=payload)
+    files = {
+        'source': ('image.jpg', image_bytes)
+    }
+    response = requests.post(url, data=payload, files=files)
     if not response.ok:
         print("Facebook post failed:", response.json())
     response.raise_for_status()
@@ -167,8 +182,11 @@ if __name__ == "__main__":
         print("\n--- Generated Caption ---")
         print(caption)
         print("-------------------------\n")
-        
-        post_to_facebook(caption, image_url)
+
+        print("Waiting for Pollinations image to be ready...")
+        image_bytes = fetch_image_bytes(image_url)
+
+        post_to_facebook(caption, image_bytes)
         post_to_instagram(caption, image_url)
         print("Daily automated posting completed successfully!")
     except Exception as e:
